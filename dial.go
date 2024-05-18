@@ -29,7 +29,7 @@ func dial(url, useragent, method string, verbose bool) LogMessage {
 		m.MessageType = "error"
 		m.Target = url
 		m.Message = "Can not take a status code, maybe WAF is blocking the connect for the " + url +
-			"with UserAgent " + useragent
+			"with UserAgent " + useragent + "the Error is: " + err.Error()
 		return m
 	} else {
 		m.MessageType = "regular"

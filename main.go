@@ -12,7 +12,7 @@ func main() {
 	url := flag.String("u", "", "Target Domain.")
 	delay := flag.Duration("d", 1000, "The delay in Milliseconds between requests not to be blocked by WAF.")
 	paramLevel := flag.Int("l", 1, "The count of params to be tested combined in line.")
-	output := flag.Bool("f", false, "Flag to set output to the logging file /var/log/syslog.")
+	output := flag.Bool("f", false, "Flag to set output to the logging file $TARGET.txt")
 	verbose := flag.Bool("v", false, "Flag to set verbose flag and record all debugging and rejected requests.")
 	flag.Parse()
 	if *url == "" {
@@ -27,9 +27,12 @@ func main() {
 	switch *mode {
 
 	case "day", "night":
-		params := getLiveParams(*mode, *url, *paramLevel, *delay, *output, *verbose, payload)
+		params := getLiveParams(*mode, *url, *paramLevel, *delay, *verbose, payload)
 		for _, request := range params {
 			for _, method := range request {
+				if *output {
+					method.appendToFile(*url)
+				}
 				method.getLogger()
 			}
 		}

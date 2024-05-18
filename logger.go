@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 )
 
 type LogMessage struct {
@@ -45,11 +46,17 @@ func (m *LogMessage) getLogger() {
 
 }
 
-func printChannelData(ch chan LogMessage) {
-	// Logging is for test purposes only. Will be tested "in the field".
-	// After "field" tests will pack it to a 'map[string][]string' and will return for
-	// the CVEs/CPEs/CWEs processor for an analysis.
-	var m LogMessage
-	m = <-ch
-	m.getLogger()
+func (m *LogMessage) appendToFile(url string) {
+	filename := "./assets/" + url + ".log"
+	f, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+	// if something is wrong with the file just print to the console
+	if err != nil {
+		m.getLogger()
+	}
+
+	defer f.Close()
+
+	if _, err = f.WriteString(m.Message + "\n"); err != nil {
+		m.getLogger()
+	}
 }

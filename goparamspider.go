@@ -94,11 +94,11 @@ func (Payloads *Payloads) readJSON(assets string) {
 func getRandomUserAgent() string {
 	content := openFile("./assets/UserAgent.txt")
 	res := strings.Split(string(content[:]), "\n")
-	nrand := randRange(0, len(res))
+	nrand := randRange(1, len(res))
 	return res[nrand-1]
 }
 
-func getLiveParams(mode, url string, paramLevel int, delay time.Duration, output, verbose bool, payload Payloads) [][]LogMessage {
+func getLiveParams(mode, url string, paramLevel int, delay time.Duration, verbose bool, payload Payloads) [][]LogMessage {
 	var res [][]LogMessage
 	var launchMethod Method
 
@@ -107,19 +107,19 @@ func getLiveParams(mode, url string, paramLevel int, delay time.Duration, output
 			for _, day := range Mode.Day {
 				for _, get := range day.Get {
 					launchMethod = get
-					res = append(res, intruder(url, paramLevel, delay, verbose, launchMethod))
+					res = append(res, intruder(url, "GET", paramLevel, delay, verbose, launchMethod))
 				}
 				for _, post := range day.Post {
 					launchMethod = post
-					res = append(res, intruder(url, paramLevel, delay, verbose, launchMethod))
+					res = append(res, intruder(url, "POST", paramLevel, delay, verbose, launchMethod))
 				}
-				for _, options := range day.Post {
+				for _, options := range day.Options {
 					launchMethod = options
-					res = append(res, intruder(url, paramLevel, delay, verbose, launchMethod))
+					res = append(res, intruder(url, "OPTIONS", paramLevel, delay, verbose, launchMethod))
 				}
-				for _, patch := range day.Post {
+				for _, patch := range day.Patch {
 					launchMethod = patch
-					res = append(res, intruder(url, paramLevel, delay, verbose, launchMethod))
+					res = append(res, intruder(url, "PATCH", paramLevel, delay, verbose, launchMethod))
 				}
 			}
 		} else {
@@ -127,19 +127,19 @@ func getLiveParams(mode, url string, paramLevel int, delay time.Duration, output
 			for _, day := range Mode.Night {
 				for _, get := range day.Get {
 					launchMethod = get
-					res = append(res, intruder(url, paramLevel, delay, verbose, launchMethod))
+					res = append(res, intruder(url, "GET", paramLevel, delay, verbose, launchMethod))
 				}
 				for _, post := range day.Post {
 					launchMethod = post
-					res = append(res, intruder(url, paramLevel, delay, verbose, launchMethod))
+					res = append(res, intruder(url, "POST", paramLevel, delay, verbose, launchMethod))
 				}
-				for _, options := range day.Post {
+				for _, options := range day.Patch {
 					launchMethod = options
-					res = append(res, intruder(url, paramLevel, delay, verbose, launchMethod))
+					res = append(res, intruder(url, "PATCH", paramLevel, delay, verbose, launchMethod))
 				}
-				for _, patch := range day.Post {
+				for _, patch := range day.Options {
 					launchMethod = patch
-					res = append(res, intruder(url, paramLevel, delay, verbose, launchMethod))
+					res = append(res, intruder(url, "OPTIONS", paramLevel, delay, verbose, launchMethod))
 				}
 			}
 		}
@@ -148,7 +148,7 @@ func getLiveParams(mode, url string, paramLevel int, delay time.Duration, output
 	return res
 }
 
-func intruder(url string, paramLevel int, delay time.Duration, verbose bool, payload Method) []LogMessage {
+func intruder(url, method string, paramLevel int, delay time.Duration, verbose bool, payload Method) []LogMessage {
 	var allLog LogMessage
 	var params []string
 	var fuzzParam []string
@@ -157,7 +157,8 @@ func intruder(url string, paramLevel int, delay time.Duration, verbose bool, pay
 	userAgent := getRandomUserAgent()
 
 	for _, value := range payload.Routes {
-		// forming a list of parameters
+		// forming a list of parameters according to a parameter level
+		// highly not recommending something more than 2-3 levels, the HUGE # of requests
 		params = nil
 		for p := 0; p < paramLevel; p++ {
 			for pi, param := range payload.Parameters {
@@ -170,8 +171,8 @@ func intruder(url string, paramLevel int, delay time.Duration, verbose bool, pay
 			}
 		}
 		time.Sleep(delay * time.Millisecond)
-		// Checking default routes with GET method WITHOUT parameters
-		allLog = dial(url+value, userAgent, "GET", verbose)
+		// Checking default routes WITHOUT parameters
+		allLog = dial(url+value, userAgent, method, verbose)
 		if verbose {
 			res = append(res, allLog)
 		} else {
@@ -182,6 +183,7 @@ func intruder(url string, paramLevel int, delay time.Duration, verbose bool, pay
 		for p := 0; p < paramLevel; p++ {
 			for i := 0; i < len(params); i++ {
 				for _, payloads := range payload.Payloads {
+					// Loading payloads into parameters
 					fuzzParam = nil
 					fuzzParam = strings.Split(params[i], "=")
 					for j, _ := range fuzzParam {
@@ -190,8 +192,9 @@ func intruder(url string, paramLevel int, delay time.Duration, verbose bool, pay
 						}
 						params[i] = fuzzParam[j] + "=" + payloads
 					}
+					// Checking default routes WITH parameters
 					time.Sleep(delay * time.Millisecond)
-					allLog = dial(url+value+params[i], userAgent, "GET", verbose)
+					allLog = dial(url+value+params[i], userAgent, method, verbose)
 					if verbose {
 						res = append(res, allLog)
 					} else {
