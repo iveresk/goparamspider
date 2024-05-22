@@ -13,7 +13,7 @@ func main() {
 	log := flag.String("l", "./assets/", "Log filename path. The default value is ./assets/")
 	jwt := flag.String("t", "", "The authorization token for the white-box testing.")
 	delay := flag.Duration("d", 1000, "The delay in Milliseconds between requests not to be blocked by WAF.")
-	paramLevel := flag.Int("l", 1, "The count of params to be tested combined in line.")
+	paramLevel := flag.Int("p", 1, "The count of params to be tested combined in line.")
 	output := flag.Bool("f", false, "Flag to set output to the logging file $TARGET.txt")
 	verbose := flag.Bool("v", false, "Flag to set verbose flag and record all debugging and rejected requests.")
 	flag.Parse()

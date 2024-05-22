@@ -20,7 +20,7 @@ func getHelper(message string) {
 	usage += " -u Target Domain.\n"
 	usage += " -t The authorization token for the white-box testing.\n"
 	usage += " -d - The delay between requests not to be blocked by WAF. Default value is 1000ms\n"
-	usage += " -l - The count of params to be tested combined in line.\n"
+	usage += " -p - The count of params to be tested combined in line.\n"
 	usage += " - f - Flag to set output to the logging file /var/log/syslog.\n"
 	usage += " - v - Flag to set verbose flag and record all debugging and rejected requests.\n"
 	usage += "Example:\n"
