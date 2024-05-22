@@ -10,6 +10,7 @@ func main() {
 	// Checking all the params
 	mode := flag.String("m", "day", "Mode of the tool usage defining the if it is day (PR) mode or night (Full) scan.")
 	url := flag.String("u", "", "Target Domain.")
+	log := flag.String("l", "./assets/", "Log filename path. The default value is ./assets/")
 	jwt := flag.String("t", "", "The authorization token for the white-box testing.")
 	delay := flag.Duration("d", 1000, "The delay in Milliseconds between requests not to be blocked by WAF.")
 	paramLevel := flag.Int("l", 1, "The count of params to be tested combined in line.")
@@ -32,7 +33,7 @@ func main() {
 		for _, request := range params {
 			for _, method := range request {
 				if *output {
-					method.appendToFile(*url)
+					method.appendToFile(*url, *log)
 				}
 				method.getLogger()
 			}
