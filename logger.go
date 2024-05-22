@@ -48,7 +48,7 @@ func (m *LogMessage) getLogger() {
 }
 
 func (m *LogMessage) appendToFile(url, logFilePath string) {
-	fileName := logFilePath + url + ".log"
+	fileName := logFilePath + "/" + url + ".log"
 	f, err := os.OpenFile(fileName, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 	// if something is wrong with the file just print to the console
 	if err != nil {
