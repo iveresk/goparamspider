@@ -5,11 +5,10 @@ import (
 	"strconv"
 )
 
-func dial(url, useragent, method string, verbose bool) LogMessage {
+func dial(url, jwt, useragent, method string, verbose bool) LogMessage {
 	var m LogMessage
-	protocol := "https://"
 
-	hconn, err := http.NewRequest(method, protocol+url, nil)
+	hconn, err := http.NewRequest(method, url, nil)
 	if err != nil {
 		if verbose {
 			m.Environment = "debugging"
@@ -20,6 +19,9 @@ func dial(url, useragent, method string, verbose bool) LogMessage {
 		return m
 	}
 	hconn.Header.Set("User-Agent", useragent)
+	if jwt != "" {
+		hconn.Header.Set("Authorization", "Bearer "+jwt)
+	}
 
 	resp, err := http.DefaultClient.Do(hconn)
 	if err != nil {

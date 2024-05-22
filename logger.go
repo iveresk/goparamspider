@@ -18,6 +18,7 @@ func getHelper(message string) {
 	usage := "Flags:\n"
 	usage += " -m Mode of the tool usage defining the if it is day (PR) mode or night (Full) scan.\n"
 	usage += " -u Target Domain.\n"
+	usage += " -t The authorization token for the white-box testing.\n"
 	usage += " -d - The delay between requests not to be blocked by WAF. Default value is 1000ms\n"
 	usage += " -l - The count of params to be tested combined in line.\n"
 	usage += " - f - Flag to set output to the logging file /var/log/syslog.\n"
