@@ -36,12 +36,12 @@ func (m *LogMessage) getLogger() {
 	case "helper":
 		getHelper(m.Message)
 	case "fatal":
-		slogger.Error(m.Target, m.Environment, m.Message)
+		slogger.Error(m.Message, "target", m.Target, "env", m.Environment)
 	case "regular":
-		slogger.Info(m.Target, m.Environment, m.Message)
+		slogger.Info(m.Message, "target", m.Target, "env", m.Environment)
 	case "error":
 		if m.Environment == "debugging" {
-			slogger.Warn(m.Target, m.Environment, m.Message)
+			slogger.Warn(m.Message, "target", m.Target, "env", m.Environment)
 		}
 	default:
 		getHelper(m.Message)
@@ -63,12 +63,12 @@ func (m *LogMessage) appendToFile(url, logFilePath string) {
 	case "helper":
 		getHelper(m.Message)
 	case "fatal":
-		flogger.Error(m.Target, m.Environment, m.Message)
+		flogger.Error(m.Message, "target", m.Target, "env", m.Environment)
 	case "regular":
-		flogger.Info(m.Target, m.Environment, m.Message)
+		flogger.Info(m.Message, "target", m.Target, "env", m.Environment)
 	case "error":
 		if m.Environment == "debugging" {
-			flogger.Warn(m.Target, m.Environment, m.Message)
+			flogger.Warn(m.Message, "target", m.Target, "env", m.Environment)
 		}
 	default:
 		getHelper(m.Message)
