@@ -52,14 +52,25 @@ func (m *LogMessage) getLogger() {
 func (m *LogMessage) appendToFile(url, logFilePath string) {
 	filename := logFilePath + "/" + url + ".log"
 	f, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+	flogger := slog.New(slog.NewJSONHandler(f, nil))
 	// if something is wrong with the file just print to the console
 	if err != nil {
 		m.getLogger()
 	}
-
 	defer f.Close()
 
-	if _, err = f.WriteString(m.Message + "\n"); err != nil {
-		m.getLogger()
+	switch m.MessageType {
+	case "helper":
+		getHelper(m.Message)
+	case "fatal":
+		flogger.Error(m.Target, m.Environment, m.Message)
+	case "regular":
+		flogger.Info(m.Target, m.Environment, m.Message)
+	case "error":
+		if m.Environment == "debugging" {
+			flogger.Warn(m.Target, m.Environment, m.Message)
+		}
+	default:
+		getHelper(m.Message)
 	}
 }

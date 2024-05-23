@@ -3,11 +3,9 @@
     "day" : [{
       "GET" : [{
         "routes" : [
-          "/",
           "/api/auth/",
           "/api/auth/guest/",
-          "/api/auth/login/",
-          "/api/grafana/"
+          "/api/auth/login/"
         ],
         "parameters" : [
           "v",
@@ -22,12 +20,7 @@
           "%27",
           "%27%20%2D%2D",
           "%27%20%23",
-          "%27%20â",
-          "%27%2D%2D",
-          "%27%2F%2A",
-          "%27%23",
-          "%22%20%2D%2D",
-          "%20or%201%3D1â"
+          "%27%20â"
         ]
       }],
       "POST" : [{
