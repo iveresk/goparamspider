@@ -1,14 +1,15 @@
 package main
 
 import (
+	"io"
 	"net/http"
 	"strconv"
 )
 
-func dial(url, jwt, useragent, method string, verbose bool) LogMessage {
+func dialHHTP(url, jwt, useragent, method string, verbose bool) LogMessage {
 	var m LogMessage
 
-	hconn, err := http.NewRequest(method, url, nil)
+	httpconnection, err := http.NewRequest(method, url, nil)
 	if err != nil {
 		if verbose {
 			m.Environment = "debugging"
@@ -18,12 +19,12 @@ func dial(url, jwt, useragent, method string, verbose bool) LogMessage {
 		m.Message = "Connection refused by the source " + url + "with UserAgent " + useragent
 		return m
 	}
-	hconn.Header.Set("User-Agent", useragent)
+	httpconnection.Header.Set("User-Agent", useragent)
 	if jwt != "" {
-		hconn.Header.Set("Authorization", "Bearer "+jwt)
+		httpconnection.Header.Add("Authorization", "Bearer "+jwt)
 	}
 
-	resp, err := http.DefaultClient.Do(hconn)
+	resp, err := http.DefaultClient.Do(httpconnection)
 	if err != nil {
 		if verbose {
 			m.Environment = "debugging"
@@ -33,11 +34,23 @@ func dial(url, jwt, useragent, method string, verbose bool) LogMessage {
 		m.Message = "Can not take a status code, maybe WAF is blocking the connect for the " + url +
 			"with UserAgent " + useragent + "the Error is: " + err.Error()
 		return m
-	} else {
-		m.MessageType = "regular"
-		m.Target = url
-		m.Status = resp.StatusCode
-		m.Message = "HTTP Response Status: " + strconv.Itoa(resp.StatusCode) + " " + http.StatusText(resp.StatusCode)
-		return m
 	}
+	m.MessageType = "regular"
+	m.Target = url
+	m.Status = resp.StatusCode
+	body, err := io.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	if err != nil {
+		m.MessageType = "error"
+		m.Message = "For the " + url + "HTTP Response Status: " +
+			strconv.Itoa(resp.StatusCode) + " " +
+			http.StatusText(resp.StatusCode) +
+			". Can not read the response Body."
+	} else {
+		m.Message = "For the " + url + "HTTP Response Status: " +
+			strconv.Itoa(resp.StatusCode) + " " +
+			http.StatusText(resp.StatusCode) +
+			". Response body is " + string(body)
+	}
+	return m
 }

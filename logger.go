@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"log/slog"
 	"os"
 )
 
@@ -30,16 +31,17 @@ func getHelper(message string) {
 }
 
 func (m *LogMessage) getLogger() {
+	slogger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	switch m.MessageType {
 	case "helper":
 		getHelper(m.Message)
 	case "fatal":
-		log.Fatal(m.Message)
+		slogger.Error(m.Target, m.Environment, m.Message)
 	case "regular":
-		log.Println(m.Message)
+		slogger.Info(m.Target, m.Environment, m.Message)
 	case "error":
 		if m.Environment == "debugging" {
-			log.Println(m.Message)
+			slogger.Warn(m.Target, m.Environment, m.Message)
 		}
 	default:
 		getHelper(m.Message)
@@ -48,8 +50,8 @@ func (m *LogMessage) getLogger() {
 }
 
 func (m *LogMessage) appendToFile(url, logFilePath string) {
-	fileName := logFilePath + "/" + url + ".log"
-	f, err := os.OpenFile(fileName, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+	filename := logFilePath + "/" + url + ".log"
+	f, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 	// if something is wrong with the file just print to the console
 	if err != nil {
 		m.getLogger()

@@ -27,8 +27,8 @@ func main() {
 	payload.readJSON("payloads")
 	// Main algorithm runs here
 	switch *mode {
-
-	case "day", "night", "whitebox":
+	// Day mode is for quick check before PR, night mode is for full scale check
+	case "day", "night":
 		params := getLiveParams(*mode, *url, *jwt, *paramLevel, *delay, *verbose, payload)
 		for _, request := range params {
 			for _, method := range request {

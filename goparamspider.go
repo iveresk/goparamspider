@@ -94,8 +94,8 @@ func (Payloads *Payloads) readJSON(assets string) {
 func getRandomUserAgent() string {
 	content := openFile("./assets/UserAgent.txt")
 	res := strings.Split(string(content[:]), "\n")
-	nrand := randRange(1, len(res))
-	return res[nrand-1]
+	randomid := randRange(1, len(res))
+	return res[randomid-1]
 }
 
 func getLiveParams(mode, url, jwt string, paramLevel int, delay time.Duration, verbose bool, payload Payloads) [][]LogMessage {
@@ -175,7 +175,7 @@ func intruder(url, jwt, method string, paramLevel int, delay time.Duration, verb
 		}
 		time.Sleep(delay * time.Millisecond)
 		// Checking default routes WITHOUT parameters
-		allLog = dial(url+value, jwt, userAgent, method, verbose)
+		allLog = dialHHTP(url+value, jwt, userAgent, method, verbose)
 		if verbose {
 			res = append(res, allLog)
 		} else {
@@ -197,7 +197,7 @@ func intruder(url, jwt, method string, paramLevel int, delay time.Duration, verb
 					}
 					// Checking default routes WITH parameters
 					time.Sleep(delay * time.Millisecond)
-					allLog = dial(url+value+params[i], jwt, userAgent, method, verbose)
+					allLog = dialHHTP(url+value+params[i], jwt, userAgent, method, verbose)
 					if verbose {
 						res = append(res, allLog)
 					} else {
