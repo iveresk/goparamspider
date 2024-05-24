@@ -16,7 +16,7 @@ func dialHHTP(url, jwt, useragent, method string, verbose bool) LogMessage {
 		}
 		m.MessageType = "error"
 		m.Target = url
-		m.Message = "Connection refused by the source " + url + "with UserAgent " + useragent
+		m.Message = "Connection refused by the source " + url + " with UserAgent " + useragent
 		return m
 	}
 	httpconnection.Header.Set("User-Agent", useragent)
@@ -32,7 +32,7 @@ func dialHHTP(url, jwt, useragent, method string, verbose bool) LogMessage {
 		m.MessageType = "error"
 		m.Target = url
 		m.Message = "Can not take a status code, maybe WAF is blocking the connect for the " + url +
-			"with UserAgent " + useragent + "the Error is: " + err.Error()
+			" with UserAgent " + useragent + " the Error is: " + err.Error()
 		return m
 	}
 	m.MessageType = "regular"
