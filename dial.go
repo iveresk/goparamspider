@@ -1,12 +1,13 @@
 package main
 
 import (
+	"encoding/json"
 	"io"
 	"net/http"
 	"strconv"
 )
 
-func dialHHTP(url, jwt, useragent, method string, verbose bool) LogMessage {
+func dialHHTP(url, jwt, useragent, method string, verbose bool, headers map[string]string) LogMessage {
 	var m LogMessage
 
 	httpconnection, err := http.NewRequest(method, url, nil)
@@ -23,6 +24,12 @@ func dialHHTP(url, jwt, useragent, method string, verbose bool) LogMessage {
 	if jwt != "" {
 		httpconnection.Header.Add("Authorization", "Bearer "+jwt)
 	}
+	// Adding headers to the request
+	if headers != nil {
+		for k, v := range headers {
+			httpconnection.Header.Add(k, v)
+		}
+	}
 
 	resp, err := http.DefaultClient.Do(httpconnection)
 	if err != nil {
@@ -38,6 +45,7 @@ func dialHHTP(url, jwt, useragent, method string, verbose bool) LogMessage {
 	m.MessageType = "regular"
 	m.Target = url
 	m.Status = resp.StatusCode
+	// Taking the Body of response
 	body, err := io.ReadAll(resp.Body)
 	defer resp.Body.Close()
 	if err != nil {
@@ -51,6 +59,12 @@ func dialHHTP(url, jwt, useragent, method string, verbose bool) LogMessage {
 			strconv.Itoa(resp.StatusCode) + " " +
 			http.StatusText(resp.StatusCode) +
 			". Response body is " + string(body)
+	}
+	// Taking the Header of response
+	if reqHeadersBytes, err := json.Marshal(resp.Header); err != nil {
+		m.Header = string(reqHeadersBytes)
+	} else {
+		m.Header = "Can not take header fot the target" + url
 	}
 	return m
 }

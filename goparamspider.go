@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"math/rand/v2"
 	"os"
 	"strings"
@@ -98,28 +99,50 @@ func getRandomUserAgent() string {
 	return res[randomid-1]
 }
 
-func getLiveParams(mode, url, jwt string, paramLevel int, delay time.Duration, verbose bool, payload Payloads) [][]LogMessage {
-	var res [][]LogMessage
-	var launchMethod Method
+func parseHeaders(headers string) (map[string]string, error) {
+	var (
+		res     = make(map[string]string)
+		splited []string
+		tmp     []string
+	)
+	splited = strings.Split(headers, ",")
+	if len(splited) < 1 {
+		return nil, errors.New("Invalid header format")
+	}
+	for _, v := range splited {
+		tmp = strings.Split(v, "=")
+		if len(tmp) != 2 {
+			return nil, errors.New("Invalid header format")
+		}
+		res[tmp[0]] = tmp[1]
+	}
+	return res, nil
+}
+
+func getLiveParams(mode, url, jwt string, paramLevel int, delay time.Duration, verbose, ssl bool, payload Payloads, headers map[string]string) [][]LogMessage {
+	var (
+		res          [][]LogMessage
+		launchMethod Method
+	)
 
 	for _, Mode := range payload.Mode {
 		if mode == "day" {
 			for _, day := range Mode.Day {
 				for _, get := range day.Get {
 					launchMethod = get
-					res = append(res, intruder(url, jwt, "GET", paramLevel, delay, verbose, launchMethod))
+					res = append(res, intruder(url, jwt, "GET", paramLevel, delay, verbose, ssl, launchMethod, headers))
 				}
 				for _, post := range day.Post {
 					launchMethod = post
-					res = append(res, intruder(url, jwt, "POST", paramLevel, delay, verbose, launchMethod))
+					res = append(res, intruder(url, jwt, "POST", paramLevel, delay, verbose, ssl, launchMethod, headers))
 				}
 				for _, options := range day.Options {
 					launchMethod = options
-					res = append(res, intruder(url, jwt, "OPTIONS", paramLevel, delay, verbose, launchMethod))
+					res = append(res, intruder(url, jwt, "OPTIONS", paramLevel, delay, verbose, ssl, launchMethod, headers))
 				}
 				for _, patch := range day.Patch {
 					launchMethod = patch
-					res = append(res, intruder(url, jwt, "PATCH", paramLevel, delay, verbose, launchMethod))
+					res = append(res, intruder(url, jwt, "PATCH", paramLevel, delay, verbose, ssl, launchMethod, headers))
 				}
 			}
 		} else {
@@ -127,19 +150,19 @@ func getLiveParams(mode, url, jwt string, paramLevel int, delay time.Duration, v
 			for _, day := range Mode.Night {
 				for _, get := range day.Get {
 					launchMethod = get
-					res = append(res, intruder(url, jwt, "GET", paramLevel, delay, verbose, launchMethod))
+					res = append(res, intruder(url, jwt, "GET", paramLevel, delay, verbose, ssl, launchMethod, headers))
 				}
 				for _, post := range day.Post {
 					launchMethod = post
-					res = append(res, intruder(url, jwt, "POST", paramLevel, delay, verbose, launchMethod))
+					res = append(res, intruder(url, jwt, "POST", paramLevel, delay, verbose, ssl, launchMethod, headers))
 				}
 				for _, options := range day.Patch {
 					launchMethod = options
-					res = append(res, intruder(url, jwt, "PATCH", paramLevel, delay, verbose, launchMethod))
+					res = append(res, intruder(url, jwt, "PATCH", paramLevel, delay, verbose, ssl, launchMethod, headers))
 				}
 				for _, patch := range day.Options {
 					launchMethod = patch
-					res = append(res, intruder(url, jwt, "OPTIONS", paramLevel, delay, verbose, launchMethod))
+					res = append(res, intruder(url, jwt, "OPTIONS", paramLevel, delay, verbose, ssl, launchMethod, headers))
 				}
 			}
 		}
@@ -148,14 +171,20 @@ func getLiveParams(mode, url, jwt string, paramLevel int, delay time.Duration, v
 	return res
 }
 
-func intruder(url, jwt, method string, paramLevel int, delay time.Duration, verbose bool, payload Method) []LogMessage {
-	var allLog LogMessage
-	var params []string
-	var fuzzParam []string
-	var res []LogMessage
+func intruder(url, jwt, method string, paramLevel int, delay time.Duration, verbose, ssl bool, payload Method, headers map[string]string) []LogMessage {
+	var (
+		allLog    LogMessage
+		params    []string
+		fuzzParam []string
+		res       []LogMessage
+	)
 
-	protocol := "https://"
-	url = protocol + url
+	// setting up default connection protocol
+	url = "http://" + url
+	if ssl {
+		// changing the default connection protocol if needed
+		url = "https://" + url
+	}
 
 	userAgent := getRandomUserAgent()
 
@@ -175,7 +204,7 @@ func intruder(url, jwt, method string, paramLevel int, delay time.Duration, verb
 		}
 		time.Sleep(delay * time.Millisecond)
 		// Checking default routes WITHOUT parameters
-		allLog = dialHHTP(url+value, jwt, userAgent, method, verbose)
+		allLog = dialHHTP(url+value, jwt, userAgent, method, verbose, headers)
 		if verbose {
 			res = append(res, allLog)
 		} else {
@@ -197,7 +226,7 @@ func intruder(url, jwt, method string, paramLevel int, delay time.Duration, verb
 					}
 					// Checking default routes WITH parameters
 					time.Sleep(delay * time.Millisecond)
-					allLog = dialHHTP(url+value+params[i], jwt, userAgent, method, verbose)
+					allLog = dialHHTP(url+value+params[i], jwt, userAgent, method, verbose, headers)
 					if verbose {
 						res = append(res, allLog)
 					} else {
