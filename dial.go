@@ -40,6 +40,13 @@ func dialHHTP(url, jwt, useragent, method string, verbose bool, headers map[stri
 		m.Target = url
 		m.Message = "Can not take a status code, maybe WAF is blocking the connect for the " + url +
 			" with UserAgent " + useragent + " the Error is: " + err.Error()
+		if resp != nil {
+			if reqHeadersBytes, err := json.Marshal(resp.Header); err != nil {
+				m.Header = "Can not take header fot the target " + url
+			} else {
+				m.Header = string(reqHeadersBytes)
+			}
+		}
 		return m
 	}
 	m.MessageType = "regular"
@@ -62,9 +69,9 @@ func dialHHTP(url, jwt, useragent, method string, verbose bool, headers map[stri
 	}
 	// Taking the Header of response
 	if reqHeadersBytes, err := json.Marshal(resp.Header); err != nil {
-		m.Header = string(reqHeadersBytes)
-	} else {
 		m.Header = "Can not take header fot the target " + url
+	} else {
+		m.Header = string(reqHeadersBytes)
 	}
 	return m
 }

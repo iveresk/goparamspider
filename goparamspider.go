@@ -188,6 +188,7 @@ func makeAttack(mode, url, jwt string, paramLevel int, delay time.Duration, verb
 					launchMethod = patch
 					res = append(res, intruder(url, jwt, "PATCH", paramLevel, delay, verbose, ssl, launchMethod, headers))
 				}
+				return res
 			}
 		} else {
 			// Mode Night
@@ -208,6 +209,7 @@ func makeAttack(mode, url, jwt string, paramLevel int, delay time.Duration, verb
 					launchMethod = patch
 					res = append(res, intruder(url, jwt, "OPTIONS", paramLevel, delay, verbose, ssl, launchMethod, headers))
 				}
+				return res
 			}
 		}
 
@@ -217,9 +219,9 @@ func makeAttack(mode, url, jwt string, paramLevel int, delay time.Duration, verb
 
 func intruder(url, jwt, method string, paramLevel int, delay time.Duration, verbose, ssl bool, payload Method, headers map[string]string) []LogMessage {
 	var (
-		allLog LogMessage
-		params []string
-		res    []LogMessage
+		allLog          LogMessage
+		params, fuzzeds []string
+		res             []LogMessage
 	)
 
 	// setting up default connection protocol
@@ -230,6 +232,10 @@ func intruder(url, jwt, method string, paramLevel int, delay time.Duration, verb
 	}
 	// Taking random User-Agent
 	userAgent := getRandomUserAgent()
+	// forming a list of parameters according to a parameter level
+	// highly not recommending something more than 2 levels, the HUGE # of requests
+	params = getFUZZ(paramLevel, payload.Parameters)
+	fuzzeds = replaceFUZZ(paramLevel, params, payload.Payloads)
 
 	for _, route := range payload.Routes {
 		time.Sleep(delay * time.Millisecond)
@@ -242,11 +248,6 @@ func intruder(url, jwt, method string, paramLevel int, delay time.Duration, verb
 				res = append(res, allLog)
 			}
 		}
-		// forming a list of parameters according to a parameter level
-		// highly not recommending something more than 2 levels, the HUGE # of requests
-		params = nil
-		params = getFUZZ(paramLevel, payload.Parameters)
-		fuzzeds := replaceFUZZ(paramLevel, params, payload.Payloads)
 		// Testing requests with parameters
 		for _, fuzzed := range fuzzeds {
 			// Checking default routes WITH parameters
