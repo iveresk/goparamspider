@@ -13,7 +13,7 @@ func TestDialNoConnection(t *testing.T) {
 		Target:      "https://",
 		Status:      0,
 	}
-	test = dialHHTP("https://", "", "", "GET", true)
+	test = dialHHTP("https://", "", "", "GET", true, nil)
 	if test != expect {
 		t.Errorf("expect %#v, got %#v", expect, test)
 	}
@@ -30,7 +30,7 @@ func TestDialWAF(t *testing.T) {
 		Target:      "https://gogle.com",
 		Status:      0,
 	}
-	test = dialHHTP("https://gogle.com", "", "", "GET", true)
+	test = dialHHTP("https://gogle.com", "", "", "GET", true, nil)
 	if test != expect {
 		t.Errorf("expect %#v, got %#v", expect, test)
 	}

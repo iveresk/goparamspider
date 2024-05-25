@@ -69,9 +69,10 @@ func openFile(filepath string) []byte {
 	// reading the device-keywords.json file
 	content, err := os.ReadFile(filepath)
 	if err != nil {
-		m.MessageType = "regular"
+		m.MessageType = "fatal"
 		m.Message = "There is no file " + filepath
 		m.getLogger()
+		return nil
 	}
 	return content
 }
@@ -99,27 +100,70 @@ func getRandomUserAgent() string {
 	return res[randomid-1]
 }
 
+func getFUZZ(paramlevel int, payload []string) []string {
+	var res []string
+	for p := 0; p < paramlevel; p++ {
+		for pi, param := range payload {
+			if p < 1 {
+				res = append(res, "?"+param+"=FUZZ")
+			} else {
+				for pj, _ := range payload {
+					splitted := strings.Split(res[pj], "?")
+					if len(splitted) > 1 {
+						for s := 1; s < len(splitted); s += 2 {
+							res = append(res, res[pi]+"&"+splitted[s])
+						}
+					} else {
+						res = append(res, res[pi]+"&"+res[pj])
+					}
+				}
+			}
+		}
+	}
+	return res
+}
+
+func replaceFUZZ(paramlevel int, params, payloads []string) []string {
+	var res []string
+	var fuzzParam []string
+	for p := 0; p < paramlevel; p++ {
+		for _, param := range params {
+			for _, payload := range payloads {
+				fuzzParam = nil
+				fuzzParam = strings.Split(param, "=")
+				for j, _ := range fuzzParam {
+					if fuzzParam[j] == "" || fuzzParam[j] == "FUZZ" || fuzzParam[j] == "=" {
+						continue
+					}
+					res = append(res, fuzzParam[j]+"="+payload)
+				}
+			}
+		}
+	}
+	return res
+}
+
 func parseHeaders(headers string) (map[string]string, error) {
 	var (
-		res     = make(map[string]string)
-		splited []string
-		tmp     []string
+		res        = make(map[string]string)
+		splitcomma []string
+		splitequal []string
 	)
-	splited = strings.Split(headers, ",")
-	if len(splited) < 1 {
+	splitcomma = strings.Split(headers, ",")
+	if len(splitcomma) < 1 {
 		return nil, errors.New("Invalid header format")
 	}
-	for _, v := range splited {
-		tmp = strings.Split(v, "=")
-		if len(tmp) != 2 {
+	for _, v := range splitcomma {
+		splitequal = strings.Split(v, "=")
+		if len(splitequal) != 2 {
 			return nil, errors.New("Invalid header format")
 		}
-		res[tmp[0]] = tmp[1]
+		res[splitequal[0]] = splitequal[1]
 	}
 	return res, nil
 }
 
-func getLiveParams(mode, url, jwt string, paramLevel int, delay time.Duration, verbose, ssl bool, payload Payloads, headers map[string]string) [][]LogMessage {
+func makeAttack(mode, url, jwt string, paramLevel int, delay time.Duration, verbose, ssl bool, payload Payloads, headers map[string]string) [][]LogMessage {
 	var (
 		res          [][]LogMessage
 		launchMethod Method
@@ -173,10 +217,9 @@ func getLiveParams(mode, url, jwt string, paramLevel int, delay time.Duration, v
 
 func intruder(url, jwt, method string, paramLevel int, delay time.Duration, verbose, ssl bool, payload Method, headers map[string]string) []LogMessage {
 	var (
-		allLog    LogMessage
-		params    []string
-		fuzzParam []string
-		res       []LogMessage
+		allLog LogMessage
+		params []string
+		res    []LogMessage
 	)
 
 	// setting up default connection protocol
@@ -185,26 +228,13 @@ func intruder(url, jwt, method string, paramLevel int, delay time.Duration, verb
 		// changing the default connection protocol if needed
 		url = "https://" + url
 	}
-
+	// Taking random User-Agent
 	userAgent := getRandomUserAgent()
 
-	for _, value := range payload.Routes {
-		// forming a list of parameters according to a parameter level
-		// highly not recommending something more than 2-3 levels, the HUGE # of requests
-		params = nil
-		for p := 0; p < paramLevel; p++ {
-			for pi, param := range payload.Parameters {
-				if paramLevel == 1 {
-					params = append(params, "?"+param+"=FUZZ")
-				} else {
-					params[pi] = params[pi] + "&" + param + "=FUZZ"
-				}
-
-			}
-		}
+	for _, route := range payload.Routes {
 		time.Sleep(delay * time.Millisecond)
 		// Checking default routes WITHOUT parameters
-		allLog = dialHHTP(url+value, jwt, userAgent, method, verbose, headers)
+		allLog = dialHHTP(url+route, jwt, userAgent, method, verbose, headers)
 		if verbose {
 			res = append(res, allLog)
 		} else {
@@ -212,28 +242,21 @@ func intruder(url, jwt, method string, paramLevel int, delay time.Duration, verb
 				res = append(res, allLog)
 			}
 		}
-		for p := 0; p < paramLevel; p++ {
-			for i := 0; i < len(params); i++ {
-				for _, payloads := range payload.Payloads {
-					// Loading payloads into parameters
-					fuzzParam = nil
-					fuzzParam = strings.Split(params[i], "=")
-					for j, _ := range fuzzParam {
-						if fuzzParam[j] == "" || fuzzParam[j] == "FUZZ" || fuzzParam[j] == "=" {
-							continue
-						}
-						params[i] = fuzzParam[j] + "=" + payloads
-					}
-					// Checking default routes WITH parameters
-					time.Sleep(delay * time.Millisecond)
-					allLog = dialHHTP(url+value+params[i], jwt, userAgent, method, verbose, headers)
-					if verbose {
-						res = append(res, allLog)
-					} else {
-						if allLog.MessageType == "regular" {
-							res = append(res, allLog)
-						}
-					}
+		// forming a list of parameters according to a parameter level
+		// highly not recommending something more than 2 levels, the HUGE # of requests
+		params = nil
+		params = getFUZZ(paramLevel, payload.Parameters)
+		fuzzeds := replaceFUZZ(paramLevel, params, payload.Payloads)
+		// Testing requests with parameters
+		for _, fuzzed := range fuzzeds {
+			// Checking default routes WITH parameters
+			time.Sleep(delay * time.Millisecond)
+			allLog = dialHHTP(url+route+fuzzed, jwt, userAgent, method, verbose, headers)
+			if verbose {
+				res = append(res, allLog)
+			} else {
+				if allLog.MessageType == "regular" {
+					res = append(res, allLog)
 				}
 			}
 		}

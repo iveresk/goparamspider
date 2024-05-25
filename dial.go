@@ -50,12 +50,12 @@ func dialHHTP(url, jwt, useragent, method string, verbose bool, headers map[stri
 	defer resp.Body.Close()
 	if err != nil {
 		m.MessageType = "error"
-		m.Message = "For the " + url + "HTTP Response Status: " +
+		m.Message = "For the " + url + " HTTP Response Status: " +
 			strconv.Itoa(resp.StatusCode) + " " +
 			http.StatusText(resp.StatusCode) +
 			". Can not read the response Body."
 	} else {
-		m.Message = "For the " + url + "HTTP Response Status: " +
+		m.Message = "For the " + url + " HTTP Response Status: " +
 			strconv.Itoa(resp.StatusCode) + " " +
 			http.StatusText(resp.StatusCode) +
 			". Response body is " + string(body)
@@ -64,7 +64,7 @@ func dialHHTP(url, jwt, useragent, method string, verbose bool, headers map[stri
 	if reqHeadersBytes, err := json.Marshal(resp.Header); err != nil {
 		m.Header = string(reqHeadersBytes)
 	} else {
-		m.Header = "Can not take header fot the target" + url
+		m.Header = "Can not take header fot the target " + url
 	}
 	return m
 }

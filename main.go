@@ -9,6 +9,7 @@ func main() {
 		m       LogMessage
 		payload Payloads
 		headers map[string]string
+		err     error
 	)
 	// Checking all the params
 	mode := flag.String("m", "day", "Mode of the tool usage defining the if it is day (PR) mode or night (Full) scan.")
@@ -30,11 +31,13 @@ func main() {
 	}
 
 	//Parsing Header parameters
-	headers, err := parseHeaders(*header)
-	if err != nil {
-		m.Message = "Please check your Headers parameters line."
-		m.MessageType = "helper"
-		m.getLogger()
+	if *header != "" {
+		headers, err = parseHeaders(*header)
+		if err != nil {
+			m.Message = "Please check your Headers parameters line."
+			m.MessageType = "helper"
+			m.getLogger()
+		}
 	}
 
 	// Starting to load the payloads
@@ -43,7 +46,7 @@ func main() {
 	switch *mode {
 	// Day mode is for quick check before PR, night mode is for full scale check
 	case "day", "night":
-		params := getLiveParams(*mode, *url, *jwt, *paramLevel, *delay, *verbose, *ssl, payload, headers)
+		params := makeAttack(*mode, *url, *jwt, *paramLevel, *delay, *verbose, *ssl, payload, headers)
 		for _, request := range params {
 			for _, method := range request {
 				if *output {
