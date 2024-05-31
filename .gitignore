@@ -25,4 +25,5 @@ go.work
 .idea/*.*
 .DS_Store
 .DS_Store/*.*
-assets/*log
+assets/*.log
+assets/*.json

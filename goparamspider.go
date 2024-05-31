@@ -224,11 +224,11 @@ func intruder(url, jwt, method string, paramLevel int, delay time.Duration, verb
 		res             []LogMessage
 	)
 
-	// setting up default connection protocol
-	url = "http://" + url
 	if ssl {
 		// changing the default connection protocol if needed
 		url = "https://" + url
+	} else {
+		url = "http://" + url
 	}
 	// Taking random User-Agent
 	userAgent := getRandomUserAgent()
