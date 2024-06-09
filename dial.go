@@ -1,26 +1,46 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"io"
 	"net/http"
 	"strconv"
 )
 
-func dialHHTP(url, jwt, useragent, method string, verbose bool, headers map[string]string) LogMessage {
-	var m LogMessage
+func dialHHTP(url, jwt, useragent, method string, verbose bool, headers, dbody map[string]string) LogMessage {
+	var (
+		m              LogMessage
+		httpconnection *http.Request
+		err            error
+	)
+	marshaled, _ := json.Marshal(dbody)
+	if dbody == nil {
+		httpconnection, err = http.NewRequest(method, url, nil)
+	} else {
+		if method == "GET" {
+			httpconnection, err = http.NewRequest(method, url, nil)
+		} else {
+			httpconnection, err = http.NewRequest(method, url, bytes.NewBuffer(marshaled))
+		}
+	}
 
-	httpconnection, err := http.NewRequest(method, url, nil)
 	if err != nil {
 		if verbose {
 			m.Environment = "debugging"
 		}
 		m.MessageType = "error"
+		m.Method = method
 		m.Target = url
-		m.Message = "Connection refused by the source " + url + " with UserAgent " + useragent
+		m.Body = logBody(dbody)
+		m.Message = "Invalid request " + url + " with UserAgent " + useragent
 		return m
 	}
+
 	httpconnection.Header.Set("User-Agent", useragent)
+	httpconnection.Header.Add("Accept", "application/json")
+	httpconnection.Header.Add("Content-Type", "application/json")
+
 	if jwt != "" {
 		httpconnection.Header.Add("Authorization", "Bearer "+jwt)
 	}
@@ -36,8 +56,10 @@ func dialHHTP(url, jwt, useragent, method string, verbose bool, headers map[stri
 		if verbose {
 			m.Environment = "debugging"
 		}
+		m.Method = method
 		m.MessageType = "error"
 		m.Target = url
+		m.Body = logBody(dbody)
 		m.Message = "Can not take a status code, maybe WAF is blocking the connect for the " + url +
 			" with UserAgent " + useragent + " the Error is: " + err.Error()
 		if resp != nil {
@@ -51,6 +73,8 @@ func dialHHTP(url, jwt, useragent, method string, verbose bool, headers map[stri
 	}
 	m.MessageType = "regular"
 	m.Target = url
+	m.Method = method
+	m.Body = logBody(dbody)
 	m.Status = resp.StatusCode
 	// Taking the Body of response
 	body, err := io.ReadAll(resp.Body)

