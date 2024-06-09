@@ -52,6 +52,41 @@ func TestReplaceFUZZ(t *testing.T) {
 	}
 }
 
+func TestLogBody(t *testing.T) {
+	input := map[string]string{"key1": "value1", "key2": "value2"}
+	expected := "key1:value1,key2:value2,"
+	actual := logBody(input)
+	if actual != expected {
+		t.Errorf("expect %#v, got %#v", expected, actual)
+	}
+}
+
+func TestCheckBodyFUZZ(t *testing.T) {
+	input := map[string]string{"key1": "value1FUZZ", "key2": "value2"}
+	input2 := map[string]string{"key1": "value1", "key2": "value2"}
+	if !checkBodyFuzz(input) {
+		t.Errorf("expect %#v, got %#v", true, checkBodyFuzz(input))
+	}
+	if checkBodyFuzz(input2) {
+		t.Errorf("expect %#v, got %#v", false, checkBodyFuzz(input2))
+	}
+}
+
+func TestBodyFuzz(t *testing.T) {
+	input := map[string]string{"key1": "value1FUZZ", "key2": "value2"}
+	payload := []string{"payload1", "payload2"}
+	expected := map[string]string{"key10": "value1payload1", "key11": "value1payload2"}
+	res := bodyFuzz(input, payload)
+	if len(res) != len(expected) {
+		t.Errorf("expect %#v, got %#v", expected, res)
+	}
+	for i, v := range res {
+		if v != expected[i] {
+			t.Errorf("expect %#v, got %#v", expected, res)
+		}
+	}
+}
+
 func TestParseHeadersNil(t *testing.T) {
 	header := ""
 	expect := map[string]string{"key1": "value1", "key2": "value2"}

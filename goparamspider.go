@@ -5,6 +5,7 @@ import (
 	"errors"
 	"math/rand/v2"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -143,6 +144,35 @@ func replaceFUZZ(paramlevel int, params, payloads []string) []string {
 	return res
 }
 
+func checkBodyFuzz(body map[string]string) bool {
+	for _, v := range body {
+		if strings.Contains(v, "FUZZ") {
+			return true
+		}
+	}
+	return false
+}
+
+func bodyFuzz(body map[string]string, payloads []string) map[string]string {
+	var res = make(map[string]string)
+	for k, v := range body {
+		if strings.Contains(v, "FUZZ") {
+			for i, payload := range payloads {
+				res[k+strconv.Itoa(i)] = strings.Replace(v, "FUZZ", payload, 1)
+			}
+		}
+	}
+	return res
+}
+
+func logBody(body map[string]string) string {
+	res := ""
+	for k, v := range body {
+		res = res + k + ":" + v + ","
+	}
+	return res
+}
+
 func parseHeaders(headers string) (map[string]string, error) {
 	var (
 		res        = make(map[string]string)
@@ -163,7 +193,7 @@ func parseHeaders(headers string) (map[string]string, error) {
 	return res, nil
 }
 
-func makeAttack(mode, url, jwt string, paramLevel int, delay time.Duration, verbose, ssl bool, payload Payloads, headers map[string]string) [][]LogMessage {
+func makeAttack(mode, url, jwt string, paramLevel int, delay time.Duration, verbose, ssl bool, payload Payloads, headers, body map[string]string) [][]LogMessage {
 	var (
 		res          [][]LogMessage
 		launchMethod Method
@@ -174,19 +204,19 @@ func makeAttack(mode, url, jwt string, paramLevel int, delay time.Duration, verb
 			for _, day := range Mode.Day {
 				for _, get := range day.Get {
 					launchMethod = get
-					res = append(res, intruder(url, jwt, "GET", paramLevel, delay, verbose, ssl, launchMethod, headers))
+					res = append(res, intruder(url, jwt, "GET", paramLevel, delay, verbose, ssl, launchMethod, headers, body))
 				}
 				for _, post := range day.Post {
 					launchMethod = post
-					res = append(res, intruder(url, jwt, "POST", paramLevel, delay, verbose, ssl, launchMethod, headers))
+					res = append(res, intruder(url, jwt, "POST", paramLevel, delay, verbose, ssl, launchMethod, headers, body))
 				}
 				for _, options := range day.Options {
 					launchMethod = options
-					res = append(res, intruder(url, jwt, "OPTIONS", paramLevel, delay, verbose, ssl, launchMethod, headers))
+					res = append(res, intruder(url, jwt, "OPTIONS", paramLevel, delay, verbose, ssl, launchMethod, headers, body))
 				}
 				for _, patch := range day.Patch {
 					launchMethod = patch
-					res = append(res, intruder(url, jwt, "PATCH", paramLevel, delay, verbose, ssl, launchMethod, headers))
+					res = append(res, intruder(url, jwt, "PATCH", paramLevel, delay, verbose, ssl, launchMethod, headers, body))
 				}
 				return res
 			}
@@ -195,19 +225,19 @@ func makeAttack(mode, url, jwt string, paramLevel int, delay time.Duration, verb
 			for _, day := range Mode.Night {
 				for _, get := range day.Get {
 					launchMethod = get
-					res = append(res, intruder(url, jwt, "GET", paramLevel, delay, verbose, ssl, launchMethod, headers))
+					res = append(res, intruder(url, jwt, "GET", paramLevel, delay, verbose, ssl, launchMethod, headers, body))
 				}
 				for _, post := range day.Post {
 					launchMethod = post
-					res = append(res, intruder(url, jwt, "POST", paramLevel, delay, verbose, ssl, launchMethod, headers))
+					res = append(res, intruder(url, jwt, "POST", paramLevel, delay, verbose, ssl, launchMethod, headers, body))
 				}
 				for _, options := range day.Patch {
 					launchMethod = options
-					res = append(res, intruder(url, jwt, "PATCH", paramLevel, delay, verbose, ssl, launchMethod, headers))
+					res = append(res, intruder(url, jwt, "PATCH", paramLevel, delay, verbose, ssl, launchMethod, headers, body))
 				}
 				for _, patch := range day.Options {
 					launchMethod = patch
-					res = append(res, intruder(url, jwt, "OPTIONS", paramLevel, delay, verbose, ssl, launchMethod, headers))
+					res = append(res, intruder(url, jwt, "OPTIONS", paramLevel, delay, verbose, ssl, launchMethod, headers, body))
 				}
 				return res
 			}
@@ -217,11 +247,12 @@ func makeAttack(mode, url, jwt string, paramLevel int, delay time.Duration, verb
 	return res
 }
 
-func intruder(url, jwt, method string, paramLevel int, delay time.Duration, verbose, ssl bool, payload Method, headers map[string]string) []LogMessage {
+func intruder(url, jwt, method string, paramLevel int, delay time.Duration, verbose, ssl bool, payload Method, headers, body map[string]string) []LogMessage {
 	var (
 		allLog          LogMessage
 		params, fuzzeds []string
 		res             []LogMessage
+		fuzzbody        map[string]string
 	)
 
 	if ssl {
@@ -236,28 +267,69 @@ func intruder(url, jwt, method string, paramLevel int, delay time.Duration, verb
 	// highly not recommending something more than 2 levels, the HUGE # of requests
 	params = getFUZZ(paramLevel, payload.Parameters)
 	fuzzeds = replaceFUZZ(paramLevel, params, payload.Payloads)
+	// Time to FUZZ body if it is in param
+	if body != nil && checkBodyFuzz(body) {
+		fuzzbody = bodyFuzz(body, payload.Payloads)
+	}
 
 	for _, route := range payload.Routes {
 		time.Sleep(delay * time.Millisecond)
 		// Checking default routes WITHOUT parameters
-		allLog = dialHHTP(url+route, jwt, userAgent, method, verbose, headers)
-		if verbose {
-			res = append(res, allLog)
-		} else {
-			if allLog.MessageType == "regular" {
-				res = append(res, allLog)
-			}
-		}
-		// Testing requests with parameters
-		for _, fuzzed := range fuzzeds {
-			// Checking default routes WITH parameters
-			time.Sleep(delay * time.Millisecond)
-			allLog = dialHHTP(url+route+fuzzed, jwt, userAgent, method, verbose, headers)
+		if fuzzbody == nil {
+			allLog = dialHHTP(url+route, jwt, userAgent, method, verbose, headers, body)
 			if verbose {
 				res = append(res, allLog)
 			} else {
 				if allLog.MessageType == "regular" {
 					res = append(res, allLog)
+				}
+			}
+		} else {
+			for k, v := range fuzzbody {
+				for k2, _ := range body {
+					if strings.Contains(k, k2) {
+						body[k2] = v
+					}
+				}
+				allLog = dialHHTP(url+route, jwt, userAgent, method, verbose, headers, body)
+				if verbose {
+					res = append(res, allLog)
+				} else {
+					if allLog.MessageType == "regular" {
+						res = append(res, allLog)
+					}
+				}
+			}
+		}
+
+		// Testing requests with parameters
+		for _, fuzzed := range fuzzeds {
+			// Checking default routes WITH parameters
+			time.Sleep(delay * time.Millisecond)
+			if fuzzbody == nil {
+				allLog = dialHHTP(url+route+fuzzed, jwt, userAgent, method, verbose, headers, body)
+				if verbose {
+					res = append(res, allLog)
+				} else {
+					if allLog.MessageType == "regular" {
+						res = append(res, allLog)
+					}
+				}
+			} else {
+				for k, v := range fuzzbody {
+					for k2, _ := range body {
+						if strings.Contains(k, k2) {
+							body[k2] = v
+						}
+					}
+					allLog = dialHHTP(url+route+fuzzed, jwt, userAgent, method, verbose, headers, body)
+					if verbose {
+						res = append(res, allLog)
+					} else {
+						if allLog.MessageType == "regular" {
+							res = append(res, allLog)
+						}
+					}
 				}
 			}
 		}
